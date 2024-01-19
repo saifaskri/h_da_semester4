@@ -1,6 +1,6 @@
 @echo off
 setlocal
-dir
+
 REM Your commit message with timestamp
 set "commit_message=Automated commit - %date% %time%"
 
