@@ -1,0 +1,24 @@
+CREATE OR REPLACE FUNCTION bookFlightChecker() RETURNS TRIGGER AS $bookFlightChecker$
+
+DECLARE
+    
+freeSeats INT := 0;
+
+BEGIN
+    SELECT getFreeSeats(NEW.flugnr, NEW.datum) INTO freeSeats;
+
+    IF freeSeats > 0 
+        THEN
+            RAISE NOTICE 'Booking is being processed';
+            RETURN NEW;
+        ELSE
+            RAISE NOTICE 'There is no Seat left';
+            RETURN NULL;
+    END IF;
+END;
+
+$bookFlightChecker$ LANGUAGE plpgsql;
+
+DROP TRIGGER bookFlightChecker ON Buchung,
+CREATE TRIGGER bookFlightChecker BEFOR INSERT ON Buchung 
+    for each row execute procedure bookFlightChecker();
