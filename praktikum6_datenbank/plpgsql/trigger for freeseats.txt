@@ -19,6 +19,6 @@ END;
 
 $bookFlightChecker$ LANGUAGE plpgsql;
 
-DROP TRIGGER bookFlightChecker ON Buchung,
-CREATE TRIGGER bookFlightChecker BEFOR INSERT ON Buchung 
+DROP TRIGGER bookFlightCheckerTrigger ON Buchung,
+CREATE TRIGGER bookFlightCheckerTrigger BEFOR INSERT ON Buchung 
     for each row execute procedure bookFlightChecker();
