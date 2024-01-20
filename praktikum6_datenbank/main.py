@@ -1,14 +1,15 @@
 from sqlalchemy import *
 
-
-user = "saif_zineddine"
+user = "stsaaskri"
 password = "Saif2019@"
-dbname = "stsaaskri"
+dbname = "saif_zineddine"
 server = "141.100.70.93"
 
 # Create an engine object with connection information to the database
 # This uses python f-strings, see https://peps.python.org/pep-0498/
-engine = create_engine(f"postgresql+psycopg2://{user}:{password}@{server}/{dbname}", echo=True)
+DATABASE_URL = f"postgresql+psycopg2://{user}:{password}@{server}/{dbname}"
+
+engine = create_engine(DATABASE_URL, echo=True)
 
 
 def get_all_airports():
@@ -20,7 +21,39 @@ def get_all_airports():
     element.
     The order of the airports is not important.
     """
-    pass
+    with engine.connect() as con:
+        stmt = text(f"select iata, name  from flughaefen")
+        return con.execute(stmt)  # binding parameters on execution
+
+
+def addNewUser(vorname: str, nachname: str) -> int:
+    print(f"Adding new User {vorname} {nachname}")
+    newKnr = lastKnr() + 1
+    with engine.connect() as con:
+        stmt = text(
+            f"INSERT INTO Passagiere (knr,nachname,vorname,bonusmeilen) VALUES (:newKnr ,:vorname , :nachname, 0)")
+        result = con.execute(stmt, {"newKnr": newKnr, "vorname": vorname,
+                                    "nachname": nachname})  # binding parameters on execution
+
+        """ # Check the result for success
+        if result.rowcount > 0:
+            print("Insert successful!")
+        else:
+            print("Insert failed!") 
+        """
+        return newKnr
+
+
+def lastKnr():
+    with engine.connect() as con:
+        stmt = text("select MAX(knr) from Passagiere p ")
+        return con.execute(stmt)  # binding parameters on execution
+
+
+def fetchUser(vorname: str, nachname: str):
+    with engine.connect() as con:
+        stmt = text("select * from Passagiere p where p.vorname = :vorname and p.nachname = :nachname")
+        return con.execute(stmt, {"vorname": vorname, "nachname": nachname})  # binding parameters on execution
 
 
 def login(vorname: str, nachname: str) -> int:
@@ -34,7 +67,13 @@ def login(vorname: str, nachname: str) -> int:
     in the database and return the new Kundennummer.
     Don't forget to commit the connection after the insert!
     """
-    pass
+    result = fetchUser(vorname: str, nachname: str)
+    print(result.all())  # fetches all rows and returns them as a list
+
+    if (result.one() is not None):
+        return result.knr
+    else:
+        return addNewUser(vorname, nachname)
 
 
 def book_flight(current_user: int, home: str):
@@ -54,13 +93,29 @@ def book_flight(current_user: int, home: str):
     by inserting the correct values to the table. Assume that all flights are 99 Euros/Dollar.
     Don't forget to commit the connection after the insert!
     """
-    pass
+    with engine.connect() as con:
+        stmt = text(f"  SELECT a.flugnr , a.datum , flug_ziel.name
+        from Abfluege as a
+        JOIN
+        Fluege as f
+        ON
+        a.flugnr = f.flugnr
+        JOIN
+        Flughaefen as flug_ziel
+        ON
+        flug_ziel.iata = f.ziel
+        ")
+        result = con.execute(stmt)
+        # print(result.fetchall())
+        stmt = text(f"INSERT INTO Buchung b (b.knr,b.flugnr,b.datum,b.preis) VALUES (7,'LH-100','2000.12.03',99)")
+        con.execute(stmt)
+        print("Insert successful!")
+        # Commit the transaction
+        con.commit()
 
-
-if __name__ == "__main__":
-
-    current_user = None
-    home = None
+        if __name__ == "__main__":
+            current_user = None
+        home = None
     while True:
         print()
         if current_user is None:
