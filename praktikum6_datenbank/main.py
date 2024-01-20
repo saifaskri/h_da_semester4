@@ -1,15 +1,14 @@
 from sqlalchemy import *
 
 
-user = ""
-password = ""
-dbname = ""
+user = "saif_zineddine"
+password = "Saif2019@"
+dbname = "stsaaskri"
 server = "141.100.70.93"
 
 # Create an engine object with connection information to the database
 # This uses python f-strings, see https://peps.python.org/pep-0498/
-engine = create_engine(
-    f"postgresql+psycopg2://{user}:{password}@{server}/{dbname}", echo=False)
+engine = create_engine(f"postgresql+psycopg2://{user}:{password}@{server}/{dbname}", echo=True)
 
 
 def get_all_airports():
