@@ -1,0 +1,5 @@
+CREATE VIEW PassagierFlugView AS
+SELECT DISTINCT ON (p.vorname, p.nachname) p.vorname, p.nachname, b.flugnr
+FROM Passagiere p
+JOIN Buchung b ON p.knr = b.knr
+

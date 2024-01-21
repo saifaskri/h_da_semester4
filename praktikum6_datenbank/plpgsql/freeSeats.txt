@@ -1,0 +1,23 @@
+CREATE OR REPLACE FUNCTION getFreeSeats(VARCHAR(8), DATE) RETURNS INT AS $getFreeSeats$
+DECLARE
+    freeSeats INT := 0;
+    flight_number VARCHAR(8) := $1;
+    flight_date DATE := $2;
+    flight_seats_capacity INT := 0;
+    flight_seats_booked INT := 0;
+
+
+BEGIN
+    SELECT fz.sitze INTO flight_seats_capacity FROM Abfluege a JOIN Flugzeuge fz ON fz.kennzeichen = a.kennzeichen WHERE a.flugnr = flight_number AND a.datum = flight_date;
+
+    SELECT count(*) INTO flight_seats_booked FROM Buchung b WHERE b.flugnr = flight_number AND b.datum = flight_date;
+
+    freeSeats := flight_seats_capacity - flight_seats_booked;
+   
+    RETURN freeSeats;
+END;
+
+$getFreeSeats$ LANGUAGE plpgsql;
+
+
+select getFreeSeats('LH-100', '2018.10.01');
